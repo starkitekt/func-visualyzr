@@ -1317,6 +1317,71 @@ function handleMouseUp() {
     isDragging = false;
 }
 
+// Mobile Touch Support
+let isPinching = false;
+let initialTouchDistance = 0;
+let initialScale = { x: 50, y: 4.5 };
+
+function handleTouchStart(e) {
+    if (e.touches.length === 1) {
+        isDragging = true;
+        isPinching = false;
+        dragStart.x = e.touches[0].clientX;
+        dragStart.y = e.touches[0].clientY;
+        originalPan.x = pan.x;
+        originalPan.y = pan.y;
+    } else if (e.touches.length === 2) {
+        isDragging = false;
+        isPinching = true;
+        initialTouchDistance = getTouchDistance(e);
+        initialScale.x = scale.x;
+        initialScale.y = scale.y;
+        originalPan.x = pan.x;
+        originalPan.y = pan.y;
+    }
+}
+
+function handleTouchMove(e) {
+    if (isDragging && e.touches.length === 1) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - dragStart.x;
+        const dy = e.touches[0].clientY - dragStart.y;
+        pan.x = originalPan.x + dx;
+        pan.y = originalPan.y + dy;
+    } else if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const currentDist = getTouchDistance(e);
+        if (initialTouchDistance > 0) {
+            const zoomFactor = currentDist / initialTouchDistance;
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            const rect = canvas.getBoundingClientRect();
+            const canvasMidX = midX - rect.left;
+            const canvasMidY = midY - rect.top;
+
+            const modelX = (canvasMidX - originalPan.x) / initialScale.x;
+            const modelY = (originalPan.y - canvasMidY) / initialScale.y;
+
+            scale.x = Math.max(5, Math.min(1000, initialScale.x * zoomFactor));
+            scale.y = Math.max(0.5, Math.min(200, initialScale.y * zoomFactor));
+
+            pan.x = canvasMidX - modelX * scale.x;
+            pan.y = canvasMidY + modelY * scale.y;
+        }
+    }
+}
+
+function handleTouchEnd(e) {
+    isDragging = false;
+    isPinching = false;
+}
+
+function getTouchDistance(e) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
 function handleWheel(e) {
     e.preventDefault();
     const zoomFactor = 1.1;
@@ -1425,6 +1490,17 @@ function wireKeyboard() {
         });
     });
 
+    // Helper functions to prevent native OS keyboard when using virtual keyboard
+    const enableVirtualMode = () => {
+        functionInputF.setAttribute('inputmode', 'none');
+        functionInputG.setAttribute('inputmode', 'none');
+    };
+
+    const disableVirtualMode = () => {
+        functionInputF.removeAttribute('inputmode');
+        functionInputG.removeAttribute('inputmode');
+    };
+
     // 2. Keyboard click handler using event delegation
     mathKbd.addEventListener('click', (e) => {
         const btn = e.target.closest('.kbd-key');
@@ -1438,6 +1514,9 @@ function wireKeyboard() {
         const start = targetInput.selectionStart;
         const end = targetInput.selectionEnd;
         const origValue = targetInput.value;
+
+        // Force virtual keyboard inputmode during typing
+        enableVirtualMode();
 
         if (btn.classList.contains('kbd-backspace')) {
             if (start > 0 || end > start) {
@@ -1466,6 +1545,7 @@ function wireKeyboard() {
     const closeBtn = document.querySelector('.kbd-close-btn');
     closeBtn.addEventListener('click', () => {
         mathKbd.classList.add('hidden');
+        disableVirtualMode();
     });
 
     const toggles = document.querySelectorAll('.kbd-toggle');
@@ -1473,8 +1553,18 @@ function wireKeyboard() {
         toggle.addEventListener('click', (e) => {
             e.preventDefault();
             activeInputId = toggle.dataset.target;
+            enableVirtualMode();
             mathKbd.classList.remove('hidden');
             document.getElementById(activeInputId).focus();
+        });
+    });
+
+    // Also support focus listeners on inputs to auto-enable virtual inputmode if the custom keyboard is open
+    [functionInputF, functionInputG].forEach(input => {
+        input.addEventListener('focus', () => {
+            if (!mathKbd.classList.contains('hidden')) {
+                enableVirtualMode();
+            }
         });
     });
 }
@@ -1604,6 +1694,12 @@ canvas.addEventListener('mousedown', handleMouseDown);
 canvas.addEventListener('mousemove', handleMouseMove);
 window.addEventListener('mouseup', handleMouseUp);
 canvas.addEventListener('wheel', handleWheel, { passive: false });
+
+// Touch events for mobile
+canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+window.addEventListener('touchend', handleTouchEnd);
+window.addEventListener('touchcancel', handleTouchEnd);
 
 window.addEventListener('resize', resizeCanvas);
 
