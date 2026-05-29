@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Visualizer</title>
+    
+    <!-- Google Fonts for LaTeX-like Serif (EB Garamond), clean UI (Plus Jakarta Sans), and monospace (DM Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX local library for beautiful math equations -->
+    <link rel="stylesheet" href="katex.min.css">
+    <script defer src="katex.min.js"></script>
+    
+    <!-- Math.js local library for robust Olympiad equation parsing & analytical derivatives -->
+    <script src="math.js"></script>
+    
+    <link rel="stylesheet" href="style.css?v=1.2">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Canvas Viewport -->
+        <main class="canvas-container">
+            <canvas id="graphCanvas"></canvas>
+            
+            <!-- Dynamic Math Formula HUD overlay -->
+            <div class="math-hud">
+                <div class="formula-card f-card">
+                    <span class="color-indicator f-color"></span>
+                    <div class="formula-wrapper">
+                        <span id="formula-text-f">f(x) = x^2</span>
+                        <span id="derivative-text-f" class="derivative-sub">f'(x) = 2x</span>
+                    </div>
+                </div>
+                <div class="formula-card g-card hidden" id="hud-g-card">
+                    <span class="color-indicator g-color"></span>
+                    <div class="formula-wrapper">
+                        <span id="formula-text-g">g(x) = x + 2</span>
+                        <span id="derivative-text-g" class="derivative-sub">g'(x) = 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intersections & Integral Details floating panel -->
+            <div class="math-overlay-panel" id="mathOverlay">
+                <div class="panel-header">Mathematical Details</div>
+                <div class="panel-body">
+                    <div class="stat-row">
+                        <span class="stat-label">Area (Integral):</span>
+                        <span class="stat-value" id="valIntegral">0.00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Intersections:</span>
+                        <span class="stat-value" id="valIntersections">None</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Floating Play / Restart + Speed controls — top-right of canvas -->
+            <div class="canvas-controls">
+                <div class="canvas-btn-row">
+                    <button id="btnPlayPause" class="canvas-btn canvas-btn-primary" title="Play / Pause">
+                        <span id="playLabel">Play</span>
+                    </button>
+                    <button id="btnRestart" class="canvas-btn canvas-btn-secondary" title="Restart">
+                        <span>Restart</span>
+                    </button>
+                </div>
+                <div class="canvas-speed-row">
+                    <input type="range" id="speedSlider" min="0" max="4" step="0.1" value="1" class="canvas-speed-slider">
+                    <span id="speedValue" class="canvas-speed-value">1.0x</span>
+                </div>
+            </div>
+
+            <!-- Contextual Tooltip -->
+            <div id="tooltip" class="tooltip hidden"></div>
+        </main>
+        
+        <!-- Glassmorphic Sidebar / Controls Panel -->
+        <aside class="control-panel">
+            <header>
+                <div class="logo-row">
+                    <div class="logo">
+                        <span class="logo-symbol">∫</span>
+                        <h1>Function Visualizer</h1>
+                    </div>
+                </div>
+            </header>
+            
+
+            
+            <!-- Target functions -->
+            <section class="control-group">
+                <h3>Mathematical Target</h3>
+                <div class="function-input-container">
+                    <div class="input-row">
+                        <div class="input-label-row">
+                            <label for="functionInput">Function f(x) =</label>
+                            <button class="kbd-toggle" data-target="functionInput">⌨ Keyboard</button>
+                        </div>
+                        <input type="text" id="functionInput" class="code-font math-input" value="x^2" placeholder="e.g. x^2, sin(x)*5">
+                    </div>
+                    
+                    <div class="toggle-row-sm">
+                        <label class="toggle-switch-sm">
+                            <input type="checkbox" id="chkEnableG">
+                            <span class="slider-sm"></span>
+                        </label>
+                        <span>Enable Curve g(x)</span>
+                    </div>
+
+                    <div class="input-row hidden" id="row-g-input">
+                        <div class="input-label-row">
+                            <label for="functionInputG">Function g(x) =</label>
+                            <button class="kbd-toggle" data-target="functionInputG">⌨ Keyboard</button>
+                        </div>
+                        <input type="text" id="functionInputG" class="code-font math-input" value="x + 2" placeholder="e.g. x + 2, cos(x)">
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Calculus and area configuration -->
+            <section class="control-group">
+                <h3>Calculus & Visuals</h3>
+                <div class="toggle-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chkShowArea" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Area Under f(x)</span>
+                </div>
+                <div class="toggle-row hidden" id="row-show-area-between">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chkShowAreaBetween">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Area Between Curves</span>
+                </div>
+                <div class="control-row-double">
+                    <div class="sub-input">
+                        <label for="intStart">Start x</label>
+                        <input type="number" id="intStart" value="0" step="0.5" class="num-input">
+                    </div>
+                    <div class="sub-input">
+                        <label for="intEnd">End x</label>
+                        <input type="number" id="intEnd" value="4" step="0.5" class="num-input">
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Real-world analogy / intuitive math HUD -->
+            <section class="control-group">
+                <h3>Intuitive Analogy</h3>
+                <div class="analogy-card" id="analogyCard">
+                    <!-- Dynamic analogy content goes here -->
+                </div>
+            </section>
+
+            <!-- Equation typologies reference accordion -->
+            <section class="control-group">
+                <h3>Equation Typology Reference</h3>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Linear Equations (y = mx + c)</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p><strong>Typology:</strong> Describes paths with constant velocity or growth rates.</p>
+                            <p><strong>Derivative (f'):</strong> A constant number `m`. The slope/speedometer never changes.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Quadratic Curves (y = ax² + bx + c)</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p><strong>Typology:</strong> Models gravity, acceleration, or parabolic trajectories.</p>
+                            <p><strong>Derivative (f'):</strong> A linear formula `2ax + b`. The speedometer rises/falls at a steady rate.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Exponential Growth (y = e^x)</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p><strong>Typology:</strong> Describes viral growth, compounding interest, or nuclear decay.</p>
+                            <p><strong>Derivative (f'):</strong> Unique formula `e^x`. The speedometer speed matches current position exactly!</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Trigonometric Oscillation (y = sin x)</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p><strong>Typology:</strong> Models waves, sound, tides, pendulums, and cycles.</p>
+                            <p><strong>Derivative (f'):</strong> Shifts to `cos x`. Speed is highest at zero position, and zero at peaks.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recording HUD and Buttons -->
+            <section class="control-group">
+                <h3>Export Animation</h3>
+                <div class="recording-controls">
+                    <button id="btnRecordGIF" class="btn secondary btn-record">
+                        <span class="record-dot"></span>
+                        <span>Record GIF</span>
+                    </button>
+                    <div class="recording-status hidden" id="recordStatus">
+                        <span class="spinner"></span>
+                        <span id="recordStatusText">Capturing frames...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Display settings -->
+            <section class="control-group">
+                <h3>Display Settings</h3>
+                <div class="toggle-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chkGrid" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Coordinate Grid</span>
+                </div>
+                <div class="toggle-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chkGuidelines" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Projection Guidelines</span>
+                </div>
+                <div class="toggle-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chkGlow" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span>Glow & Bloom Effects</span>
+                </div>
+            </section>
+            
+            <footer>
+                <p>Drag to pan • Scroll to zoom</p>
+                <p class="copyright">Designed for mathematical elegance</p>
+            </footer>
+        </aside>
+
+        <!-- Toggle button for sidebar (positioned on the top-left boundary of the panel) -->
+        <button id="sidebarToggleBtn" class="sidebar-toggle-btn" title="Toggle Sidebar"></button>
+    </div>
+
+    <!-- Shared Math Keyboard Drawer (collapsible) -->
+    <div class="math-keyboard hidden" id="mathKbd">
+        <div class="kbd-header">
+            <div class="kbd-tabs">
+                <button class="kbd-tab active" data-tab="basic">Basic</button>
+                <button class="kbd-tab" data-tab="functions">Functions</button>
+                <button class="kbd-tab" data-tab="greek">Greek & Constants</button>
+                <button class="kbd-tab" data-tab="advanced">Advanced</button>
+            </div>
+            <button class="kbd-close-btn">&times;</button>
+        </div>
+        
+        <div class="kbd-body">
+            <!-- Basic Tab -->
+            <div class="kbd-pane active" id="pane-basic">
+                <div class="kbd-grid">
+                    <button class="kbd-key" data-val="x">x</button>
+                    <button class="kbd-key" data-val="y">y</button>
+                    <button class="kbd-key" data-val="^2">²</button>
+                    <button class="kbd-key" data-val="^3">³</button>
+                    <button class="kbd-key" data-val="^">^</button>
+                    <button class="kbd-key" data-val="7">7</button>
+                    <button class="kbd-key" data-val="8">8</button>
+                    <button class="kbd-key" data-val="9">9</button>
+                    <button class="kbd-key" data-val="/">/</button>
+                    <button class="kbd-key" data-val="(">(</button>
+                    <button class="kbd-key" data-val="4">4</button>
+                    <button class="kbd-key" data-val="5">5</button>
+                    <button class="kbd-key" data-val="6">6</button>
+                    <button class="kbd-key" data-val="*">*</button>
+                    <button class="kbd-key" data-val=")">)</button>
+                    <button class="kbd-key" data-val="1">1</button>
+                    <button class="kbd-key" data-val="2">2</button>
+                    <button class="kbd-key" data-val="3">3</button>
+                    <button class="kbd-key" data-val="-">-</button>
+                    <button class="kbd-key" data-val="=">=</button>
+                    <button class="kbd-key" data-val="0">0</button>
+                    <button class="kbd-key" data-val=".">.</button>
+                    <button class="kbd-key font-small" data-val=",">,</button>
+                    <button class="kbd-key" data-val="+">+</button>
+                    <button class="kbd-key font-small" data-val="pi">π</button>
+                </div>
+            </div>
+
+            <!-- Functions Tab -->
+            <div class="kbd-pane" id="pane-functions">
+                <div class="kbd-grid">
+                    <button class="kbd-key" data-val="sin(">sin</button>
+                    <button class="kbd-key" data-val="cos(">cos</button>
+                    <button class="kbd-key" data-val="tan(">tan</button>
+                    <button class="kbd-key font-small" data-val="asin(">asin</button>
+                    <button class="kbd-key font-small" data-val="acos(">acos</button>
+                    <button class="kbd-key font-small" data-val="atan(">atan</button>
+                    <button class="kbd-key font-small" data-val="sinh(">sinh</button>
+                    <button class="kbd-key font-small" data-val="cosh(">cosh</button>
+                    <button class="kbd-key font-small" data-val="tanh(">tanh</button>
+                    <button class="kbd-key" data-val="sqrt(">√</button>
+                    <button class="kbd-key font-small" data-val="cbrt(">∛</button>
+                    <button class="kbd-key" data-val="log(">log</button>
+                    <button class="kbd-key" data-val="ln(">ln</button>
+                    <button class="kbd-key" data-val="exp(">exp</button>
+                    <button class="kbd-key" data-val="abs(">abs</button>
+                    <button class="kbd-key font-small" data-val="ceil(">ceil</button>
+                    <button class="kbd-key font-small" data-val="floor(">floor</button>
+                    <button class="kbd-key font-small" data-val="round(">round</button>
+                    <button class="kbd-key font-small" data-val="sign(">sign</button>
+                    <button class="kbd-key font-small" data-val="random()">rand</button>
+                </div>
+            </div>
+
+            <!-- Greek & Constants Tab -->
+            <div class="kbd-pane" id="pane-greek">
+                <div class="kbd-grid">
+                    <button class="kbd-key" data-val="pi">π</button>
+                    <button class="kbd-key" data-val="e">e</button>
+                    <button class="kbd-key" data-val="theta">θ</button>
+                    <button class="kbd-key" data-val="alpha">α</button>
+                    <button class="kbd-key" data-val="beta">β</button>
+                    <button class="kbd-key" data-val="gamma">γ</button>
+                    <button class="kbd-key" data-val="delta">δ</button>
+                    <button class="kbd-key" data-val="phi">φ</button>
+                    <button class="kbd-key" data-val="psi">ψ</button>
+                    <button class="kbd-key" data-val="omega">ω</button>
+                    <button class="kbd-key" data-val="sigma">σ</button>
+                    <button class="kbd-key" data-val="mu">μ</button>
+                    <button class="kbd-key" data-val="tau">τ</button>
+                    <button class="kbd-key" data-val="epsilon">ε</button>
+                    <button class="kbd-key" data-val="eta">η</button>
+                </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div class="kbd-pane" id="pane-advanced">
+                <div class="kbd-grid">
+                    <button class="kbd-key" data-val="infinity">∞</button>
+                    <button class="kbd-key" data-val="*10^">×10ⁿ</button>
+                    <button class="kbd-key" data-val="!">n!</button>
+                    <button class="kbd-key" data-val="%">%</button>
+                    <button class="kbd-key" data-val="deg">°</button>
+                    <button class="kbd-key" data-val="approx">≈</button>
+                    <button class="kbd-key" data-val="not">¬</button>
+                    <button class="kbd-key" data-val="and">∧</button>
+                    <button class="kbd-key" data-val="or">∨</button>
+                    <button class="kbd-key" data-val="xor">⊻</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Persistent utility bar at bottom -->
+        <div class="kbd-footer">
+            <button class="kbd-key kbd-backspace">⌫ Backspace</button>
+            <button class="kbd-key kbd-clear">C Clear</button>
+        </div>
+    </div>
+    
+    <script src="script.js?v=1.2"></script>
+</body>
+</html>
