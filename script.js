@@ -51,10 +51,10 @@ let originalPan = { x: 0, y: 0 };
 
 // Animation Time State (in seconds)
 let time = 0;
-const STAGE1_DURATION = 1.0; // Grid fade
-const STAGE2_DURATION = 2.0; // Guidelines / points
-const STAGE3_DURATION = 2.0; // Curves
-const STAGE4_DURATION = 1.0; // HUD & Analogy
+const STAGE1_DURATION = 1.5; // Grid fade (slower)
+const STAGE2_DURATION = 3.0; // Guidelines / points (slower)
+const STAGE3_DURATION = 4.5; // Curves (much slower and more premium)
+const STAGE4_DURATION = 1.5; // HUD & Analogy (slower)
 const TOTAL_DURATION = STAGE1_DURATION + STAGE2_DURATION + STAGE3_DURATION + STAGE4_DURATION;
 
 // Virtual Keyboard Target
@@ -1285,7 +1285,33 @@ function finishRecording() {
 }
 
 // --- Interactive Events & UI Sync ---
+function adjustLayout() {
+    const isMobile = window.innerWidth <= 768;
+    const canvasControls = document.querySelector('.canvas-controls');
+    const mathOverlay = document.getElementById('mathOverlay');
+    const canvasContainer = document.querySelector('.canvas-container');
+    const controlPanel = document.querySelector('.control-panel');
+    
+    if (!canvasControls || !mathOverlay || !canvasContainer || !controlPanel) return;
+
+    if (isMobile) {
+        if (mathOverlay.parentElement !== controlPanel) {
+            const header = controlPanel.querySelector('header');
+            if (header) {
+                header.after(mathOverlay);
+                mathOverlay.after(canvasControls);
+            }
+        }
+    } else {
+        if (mathOverlay.parentElement !== canvasContainer) {
+            canvasContainer.appendChild(mathOverlay);
+            canvasContainer.appendChild(canvasControls);
+        }
+    }
+}
+
 function resizeCanvas() {
+    adjustLayout();
     canvas.width = canvas.parentElement.clientWidth;
     canvas.height = canvas.parentElement.clientHeight;
     createAreaPattern();

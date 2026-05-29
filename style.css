@@ -1291,52 +1291,36 @@ footer .copyright {
         overflow: hidden;
     }
 
-    /* Floating toggle menu button shows up on mobile */
+    /* Hide the floating toggle menu button on mobile since controls are permanently down below */
     .sidebar-toggle-btn {
-        top: 12px;
-        right: 12px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border-color 0.2s, transform 0.15s;
+        display: none !important;
     }
 
-    .sidebar-toggle-btn::before {
-        content: '<' !important; /* Closed by default on mobile, show expand arrow */
+    /* Keep the graph window to a golden ratio height at the top */
+    .canvas-container {
+        height: 61.8vh !important;
+        width: 100% !important;
+        flex: none !important;
+        position: relative;
     }
 
-    /* When control panel is open on mobile */
-    .control-panel.open ~ .sidebar-toggle-btn {
-        right: calc(min(85vw, 350px) - 16px);
-    }
-
-    .control-panel.open ~ .sidebar-toggle-btn::before {
-        content: '>' !important; /* Open on mobile, show collapse arrow */
-    }
-
-
-
-    /* Sidebar transforms into slide-out drawer */
+    /* Sidebar/controls panel sits permanently down below the graph */
     .control-panel {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 85%;
-        max-width: 350px;
-        height: 100vh;
-        z-index: 1000;
-        transform: translateX(100%);
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        border-left: 1px solid var(--panel-border);
-        box-shadow: -15px 0 45px rgba(0, 0, 0, 0.95);
-        background: rgba(10, 14, 26, 0.96);
-        backdrop-filter: blur(20px);
+        position: relative !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 38.2vh !important;
+        border-left: none !important;
+        border-top: 1px solid var(--panel-border) !important;
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6) !important;
+        background: rgba(10, 14, 26, 0.96) !important;
+        backdrop-filter: blur(20px) !important;
         -webkit-overflow-scrolling: touch;
-    }
-
-    .control-panel.open {
-        transform: translateX(0);
+        margin: 0 !important;
+        padding: 16px 20px !important;
+        overflow-y: auto !important;
+        z-index: 10 !important;
     }
 
     /* Resize overlays to prevent overlaps */
@@ -1355,38 +1339,50 @@ footer .copyright {
     .derivative-sub {
         font-size: 0.8rem;
     }
-    /* Combine Play, Restart, and Speed into a compact single horizontal glassmorphic pill */
+    /* Static cards inside the bottom panel on mobile */
+    #mathOverlay {
+        position: static !important;
+        width: 100% !important;
+        margin-bottom: 14px !important;
+        box-shadow: none !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 10px !important;
+    }
+
     .canvas-controls {
-        top: 56px;
-        right: 12px;
-        width: auto;
-        max-width: calc(100% - 24px);
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 14px !important;
         flex-direction: row !important;
-        align-items: center;
-        background: rgba(10, 14, 26, 0.85);
-        border: 1px solid rgba(100, 140, 220, 0.16);
-        border-radius: 10px;
-        padding: 4px 8px;
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-        gap: 8px !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        box-shadow: none !important;
+        padding: 8px 12px !important;
+        gap: 12px !important;
+        border-radius: 10px !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
     .canvas-btn-row {
         width: auto !important;
-        gap: 6px !important;
-        display: flex;
+        flex: 1.2 !important;
+        gap: 8px !important;
+        display: flex !important;
     }
 
     .canvas-btn {
-        flex: none !important;
-        padding: 6px 10px !important;
+        flex: 1 !important;
+        padding: 8px 0 !important;
         width: auto !important;
         height: auto !important;
-        justify-content: center;
-        border-radius: 6px !important;
-        font-size: 0.74rem !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+        font-size: 0.8rem !important;
         font-weight: 700 !important;
     }
 
@@ -1395,27 +1391,28 @@ footer .copyright {
     }
 
     .canvas-speed-row {
-        padding: 0 4px !important;
-        border-radius: 0 !important;
+        flex: 1 !important;
         width: auto !important;
+        padding: 0 !important;
+        gap: 8px !important;
+        display: flex !important;
+        align-items: center !important;
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
-        gap: 6px !important;
-        display: flex;
-        align-items: center;
     }
 
     .canvas-speed-slider {
-        width: 48px !important;
-        height: 3px !important;
+        flex: 1 !important;
+        width: 100% !important;
+        height: 4px !important;
     }
 
     .canvas-speed-value {
-        font-size: 0.7rem !important;
-        min-width: 22px !important;
+        font-size: 0.78rem !important;
+        min-width: 28px !important;
     }
 
     /* Horizontally scrollable keyboard tabs on mobile to prevent squishing */
@@ -1476,9 +1473,5 @@ footer .copyright {
         pointer-events: none;
     }
 
-    /* Dock details card elegantly at bottom-left */
-    #mathOverlay {
-        bottom: 12px;
-        left: 12px;
-    }
+    /* Mobile overrides cleaned up */
 }

@@ -60,10 +60,7 @@ const puppeteer = require('puppeteer');
   await page.screenshot({ path: mobileClosedPath });
   console.log('Mobile closed screenshot saved: ' + mobileClosedPath);
 
-  // 3. MOBILE CAPTURE (Open Sidebar & Keyboard Active)
-  console.log('Toggling mobile Menu sidebar...');
-  await page.click('#sidebarToggleBtn');
-  await new Promise(resolve => setTimeout(resolve, 500)); // wait for slide transition
+
 
   console.log('Toggling math keyboard...');
   await page.click('.kbd-toggle');
