@@ -1,0 +1,1193 @@
+:root {
+    --bg-dark: #050912;
+    --bg-panel: rgba(10, 14, 26, 0.82);
+    --panel-border: rgba(100, 140, 220, 0.08);
+    --text-primary: #dce8f8;
+    --text-secondary: #7a93b8;
+    --text-muted: #374358;
+    --accent-blue: #1A7FFF;
+    --accent-blue-hover: #3D96FF;
+    --accent-coral: #5B9CF6;           /* was coral — now steel-blue for g(x) */
+    --accent-coral-hover: #82B4FA;
+    --accent-yellow: #93C5FD;          /* was amber  — now sky-blue for stats  */
+    --accent-yellow-glow: rgba(147, 197, 253, 0.15);
+    --accent-green: #3B82F6;           /* was green  — now medium blue         */
+    --shadow-premium: 0 12px 40px 0 rgba(0, 0, 0, 0.85);
+    --transition-smooth: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition-apple: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Canvas Viewport */
+.canvas-container {
+    flex: 1;
+    position: relative;
+    height: 100%;
+    background-color: var(--bg-dark);
+}
+
+#graphCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+
+#graphCanvas:active {
+    cursor: grabbing;
+}
+
+/* Math Equation HUD */
+.math-hud {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.formula-card {
+    background: var(--bg-panel);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border);
+    padding: 14px 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-premium);
+    color: var(--accent-blue);
+    font-family: 'EB Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    transition: var(--transition-smooth);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Control Panel Sidebar */
+.control-panel {
+    width: 380px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(16px);
+    border-left: 1px solid var(--panel-border);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-shadow: var(--shadow-premium);
+    overflow-y: auto;
+    z-index: 20;
+    flex-shrink: 0;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, border-color 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 1;
+}
+
+/* Sidebar collapsed rules for desktop/tablet flex layout */
+@media (min-width: 769px) {
+    .sidebar-collapsed .control-panel {
+        width: 0 !important;
+        padding: 0 !important;
+        border-left-width: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        overflow: hidden !important;
+    }
+}
+
+/* Custom Scrollbar for Sidebar */
+.control-panel::-webkit-scrollbar {
+    width: 6px;
+}
+.control-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.control-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+.control-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+header {
+    margin-bottom: 8px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.logo-symbol {
+    font-family: 'EB Garamond', serif;
+    font-size: 2.2rem;
+    color: var(--accent-blue);
+    font-style: italic;
+    font-weight: 600;
+}
+
+.logo h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+
+
+/* Control Groups */
+.control-group {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 20px;
+}
+
+.control-group:last-of-type {
+    border-bottom: none;
+}
+
+.control-group h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+/* Buttons */
+
+
+.btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    border: none;
+}
+
+
+
+.btn.secondary {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn.secondary:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+
+
+/* Inputs and Forms */
+.control-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-row label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+
+
+input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    height: 6px;
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(26, 127, 255, 0.5);
+}
+
+
+
+.input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-row label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.input-row input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--text-primary);
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.input-row input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(26, 127, 255, 0.25);
+}
+
+.code-font {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+}
+
+
+
+
+
+/* Toggle Switch Styling */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .3s;
+    border-radius: 10px;
+}
+
+.toggle-switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .slider {
+    background-color: rgba(26, 127, 255, 0.25);
+}
+
+.toggle-switch input:checked + .slider:before {
+    transform: translateX(16px);
+    background-color: var(--accent-blue);
+}
+
+
+
+footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 16px;
+}
+
+footer p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+footer .copyright {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive / Mobile View */
+@media (max-width: 850px) {
+    .app-container {
+        flex-direction: column-reverse;
+    }
+    
+    .control-panel {
+        width: 100%;
+        height: 40%;
+        border-left: none;
+        border-top: 1px solid var(--panel-border);
+        padding: 20px;
+    }
+    
+    .canvas-container {
+        height: 60%;
+    }
+}
+
+/* --- Added Features --- */
+
+.hidden {
+    display: none !important;
+}
+
+/* Multiple HUD Cards & Indicators */
+.math-hud {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.color-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.f-color {
+    background-color: var(--accent-blue);
+    box-shadow: 0 0 8px var(--accent-blue);
+}
+
+.g-color {
+    background-color: var(--accent-coral);
+    box-shadow: 0 0 8px var(--accent-coral);
+}
+
+.g-card {
+    color: var(--accent-coral) !important;
+}
+
+/* Sidebar Readings Panel */
+.readings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.readings-section {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+.readings-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding-bottom: 4px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    margin: 6px 0;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-family: 'DM Mono', monospace;
+    color: var(--accent-yellow);
+    font-weight: 500;
+}
+
+/* Double column input rows */
+.control-row-double {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.sub-input {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sub-input label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.num-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.num-input:focus {
+    border-color: var(--accent-blue);
+}
+
+/* Dropdown option styles for dark theme */
+select.num-input option {
+    background: #050912;
+    color: #dce8f8;
+}
+
+.toggle-row-sm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+.toggle-switch-sm {
+    position: relative;
+    display: inline-block;
+    width: 28px;
+    height: 16px;
+}
+
+.toggle-switch-sm input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch-sm .slider-sm {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .3s;
+    border-radius: 8px;
+}
+
+.toggle-switch-sm .slider-sm:before {
+    position: absolute;
+    content: "";
+    height: 10px;
+    width: 10px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.toggle-switch-sm input:checked + .slider-sm {
+    background-color: rgba(26, 127, 255, 0.22);
+}
+
+.toggle-switch-sm input:checked + .slider-sm:before {
+    transform: translateX(12px);
+    background-color: var(--accent-blue);
+}
+
+/* Math virtual keyboard drawer */
+.input-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kbd-toggle {
+    background: none;
+    border: none;
+    color: var(--accent-blue);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.kbd-toggle:hover {
+    color: var(--accent-blue-hover);
+    text-decoration: underline;
+}
+
+
+
+/* Analogy Details Card */
+.analogy-card {
+    background: rgba(26, 127, 255, 0.04);
+    border: 1px solid rgba(26, 127, 255, 0.1);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.analogy-card p {
+    margin-bottom: 8px;
+}
+
+.analogy-card p:last-child {
+    margin-bottom: 0;
+}
+
+.analogy-card strong {
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+.analogy-card .analogy-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+
+/* GIF Recording HUD */
+.recording-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-record {
+    border: 1px solid rgba(91, 156, 246, 0.2) !important;
+    color: var(--accent-coral) !important;
+}
+
+.btn-record:hover {
+    background: rgba(91, 156, 246, 0.08) !important;
+    box-shadow: 0 0 12px rgba(91, 156, 246, 0.2);
+}
+
+.btn-record.recording {
+    background: rgba(26, 127, 255, 0.15) !important;
+    color: #60A5FA !important;
+    border-color: rgba(26, 127, 255, 0.4) !important;
+    animation: pulseBorder 1.5s infinite;
+}
+
+@keyframes pulseBorder {
+    0% { border-color: rgba(26, 127, 255, 0.3); }
+    50% { border-color: rgba(26, 127, 255, 0.8); box-shadow: 0 0 12px rgba(26, 127, 255, 0.3); }
+    100% { border-color: rgba(26, 127, 255, 0.3); }
+}
+
+.record-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-blue);
+    border-radius: 50%;
+}
+
+.recording.btn-record .record-dot {
+    background-color: #60A5FA;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+.recording-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+}
+
+.spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(26, 127, 255, 0.15);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.formula-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.derivative-sub {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 3px;
+    width: 100%;
+    font-style: italic;
+}
+
+/* Actions Row Styling */
+.actions-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.btn-reset {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.btn-reset:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.btn-reset:active {
+    transform: scale(0.97);
+}
+
+.reset-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* ---- Premium Consolidated Math Keyboard Styles ---- */
+.math-keyboard {
+    position: fixed;
+    bottom: 24px;
+    left: 300px;
+    width: 500px;
+    z-index: 200;
+    background: rgba(10, 14, 26, 0.82);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(100, 140, 220, 0.15);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, visibility 0.3s;
+    opacity: 1;
+    visibility: visible;
+}
+
+.math-keyboard.hidden {
+    display: block !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.kbd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kbd-title {
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: 0.02em;
+}
+
+.kbd-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.4rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-smooth);
+    line-height: 1;
+}
+
+.kbd-close-btn:hover {
+    color: #ff6b6b;
+    background: rgba(239, 83, 80, 0.1);
+}
+
+.kbd-body {
+    margin-top: 12px;
+}
+
+.kbd-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+}
+
+.kbd-key {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #dce8f8;
+    padding: 10px 0;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kbd-key:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(26, 127, 255, 0.4);
+    box-shadow: 0 0 12px rgba(26, 127, 255, 0.25);
+    color: #fff;
+}
+
+.kbd-key:active {
+    transform: scale(0.92);
+}
+
+.kbd-key.font-small {
+    font-size: 0.78rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+}
+
+.kbd-key.kbd-backspace {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.kbd-key.kbd-clear {
+    background: rgba(239, 83, 80, 0.12);
+    color: #ff8a80;
+    border-color: rgba(239, 83, 80, 0.2);
+}
+
+.kbd-key.kbd-clear:hover {
+    background: rgba(239, 83, 80, 0.22);
+    border-color: rgba(239, 83, 80, 0.5);
+    box-shadow: 0 0 12px rgba(239, 83, 80, 0.25);
+    color: #fff;
+}
+
+
+/* Logo row and Close button */
+.logo-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+
+
+/* Sidebar toggle button (floating precision control) */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 24px;
+    right: 364px; /* Centered on the left border of the 380px sidebar */
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(10, 14, 26, 0.80);
+    border: 1px solid rgba(100, 140, 220, 0.18);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1100;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border-color 0.2s, transform 0.15s;
+    font-size: 0.95rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.sidebar-toggle-btn::before {
+    content: '>'; /* Collapse by default when sidebar is open */
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(18, 26, 48, 0.95);
+    border-color: rgba(100, 140, 220, 0.35);
+}
+
+.sidebar-toggle-btn:active {
+    transform: scale(0.92);
+}
+
+/* Collapsed state on desktop */
+.sidebar-collapsed .sidebar-toggle-btn {
+    right: 24px;
+}
+
+.sidebar-collapsed .sidebar-toggle-btn::before {
+    content: '<'; /* Expand when sidebar is collapsed */
+}
+
+/* ---- RESPONSIVE MEDIA QUERIES ---- */
+
+@media (max-width: 1024px) {
+    .control-panel {
+        width: 320px;
+        padding: 20px;
+    }
+    
+    .math-hud {
+        top: 16px;
+        left: 16px;
+    }
+    
+    .formula-card {
+        padding: 10px 16px;
+        font-size: 1.25rem;
+    }
+    
+    .sidebar-toggle-btn {
+        right: 304px; /* Centered on the left border of the 320px sidebar */
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hide the floating toggle menu button on mobile since controls are permanently down below */
+    .sidebar-toggle-btn {
+        display: none !important;
+    }
+
+    /* Keep the graph window to a golden ratio height at the top */
+    .canvas-container {
+        height: 61.8vh !important;
+        width: 100% !important;
+        flex: none !important;
+        position: relative;
+    }
+
+    /* Sidebar/controls panel sits permanently down below the graph */
+    .control-panel {
+        position: relative !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 38.2vh !important;
+        border-left: none !important;
+        border-top: 1px solid var(--panel-border) !important;
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6) !important;
+        background: rgba(10, 14, 26, 0.96) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 !important;
+        padding: 16px 20px !important;
+        overflow-y: auto !important;
+        z-index: 10 !important;
+    }
+
+    /* Resize overlays to prevent overlaps */
+    .math-hud {
+        top: 12px;
+        left: 12px;
+        max-width: 45%;
+    }
+
+    .formula-card {
+        padding: 8px 12px;
+        font-size: 1.05rem;
+        border-radius: 8px;
+    }
+
+    .derivative-sub {
+        font-size: 0.8rem;
+    }
+    /* Static cards inside the bottom panel on mobile */
+    #mathOverlay {
+        position: static !important;
+        width: 100% !important;
+        margin-bottom: 14px !important;
+        box-shadow: none !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 10px !important;
+        padding: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    .canvas-controls {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 14px !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        box-shadow: none !important;
+        padding: 8px 12px !important;
+        gap: 12px !important;
+        border-radius: 10px !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .canvas-btn-row {
+        width: auto !important;
+        flex: 1.2 !important;
+        gap: 8px !important;
+        display: flex !important;
+    }
+
+    .canvas-btn {
+        flex: 1 !important;
+        padding: 8px 0 !important;
+        width: auto !important;
+        height: auto !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+    }
+
+    .canvas-btn span {
+        display: inline;
+    }
+
+    .canvas-speed-row {
+        flex: 1 !important;
+        width: auto !important;
+        padding: 0 !important;
+        gap: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .canvas-speed-slider {
+        flex: 1 !important;
+        width: 100% !important;
+        height: 4px !important;
+    }
+
+    .canvas-speed-value {
+        font-size: 0.78rem !important;
+        min-width: 28px !important;
+    }
+
+
+    .kbd-close-btn {
+        font-size: 1.6rem !important;
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    /* Expand keyboard drawer nicely on mobile */
+    .math-keyboard {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 16px 16px 0 0 !important;
+        border: 1px solid rgba(100, 140, 220, 0.18) !important;
+        border-bottom: none !important;
+        z-index: 1100;
+        background: rgba(8, 12, 22, 0.98);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+        transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
+        padding: 14px;
+    }
+    
+    .math-keyboard.hidden {
+        display: block !important;
+        transform: translateY(100%);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    /* Mobile overrides cleaned up */
+}
+
+/* Parameter Stepper Styling */
+.parameter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.parameter-row-stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.parameter-name {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stepper-control {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 2px;
+    height: 36px;
+    transition: var(--transition-smooth);
+}
+
+.stepper-control:focus-within {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(26, 127, 255, 0.25);
+}
+
+.stepper-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: var(--transition-smooth);
+    user-select: none;
+}
+
+.stepper-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-blue-hover);
+}
+
+.stepper-btn:active {
+    transform: scale(0.9);
+}
+
+.stepper-input {
+    width: 60px;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: var(--accent-blue);
+    text-align: center;
+    font-weight: 600;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
